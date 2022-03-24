@@ -1,3 +1,5 @@
+from kg_core.kg import KGv3
+
 class HelloKG():
     def __init__(self):
         pass
