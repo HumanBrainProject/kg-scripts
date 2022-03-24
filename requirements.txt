@@ -1,0 +1,1 @@
+git+https://github.com/HumanBrainProject/kg-core-python.git@master#egg=kg_core

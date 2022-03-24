@@ -1,0 +1,1 @@
+A minimal automation job for KG doing nothing but saying "Hi"
