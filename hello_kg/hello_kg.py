@@ -7,7 +7,7 @@ class HelloKG():
         pass
 
     def say_hello(self, properties):
-        me = self.kg.me()
+        me = self.kg.me().data()
         print(f"Hello {properties['name']} - aka {me['http://schema.org/name']}! Welcome to the KG automation! I'm going to talk to {self.kg.endpoint}")
 
 
