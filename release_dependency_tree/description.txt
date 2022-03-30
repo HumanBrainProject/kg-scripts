@@ -1,0 +1,3 @@
+This script allows to release the whole dependency tree (as you would see it in the KG editor) of a list of UUIDs.
+
+It is possible to define if EBRAINS-owned DOIs shall be released too.
