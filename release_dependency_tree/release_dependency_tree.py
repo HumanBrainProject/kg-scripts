@@ -57,6 +57,8 @@ class ReleaseDependencyTree(object):
                                 print(f"Successfully released {k}")
                             else:
                                 print(f"Was not able to release {k} - {release_result.error()}")
+                    elif v["data"] == "RELEASED":
+                        print(f"Skipping {k} because it's already released")
         else:
             print(f"No release tree found for id {id}")
 
