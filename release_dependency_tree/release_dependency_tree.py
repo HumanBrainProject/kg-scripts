@@ -42,20 +42,23 @@ class ReleaseDependencyTree(object):
         data = scope_tree.data()
         id_collector = set()
         id_collector.add(id)
-        self._get_ids_of_tree(data, id_collector)
-        status = self.kg.post(f"/instancesByIds/release/status", payload=list(id_collector), params={"releaseTreeScope": "TOP_INSTANCE_ONLY"})
-        if status.is_successful():
-            for k in status.data().keys():
-                v = status.data()[k]
-                if "data" not in v or v["data"] != "RELEASED":
-                    if self._simulate:
-                        print(f"Would release {k}")
-                    else:
-                        release_result = self.kg.put(f"/instances/{k}/release", {}, {})
-                        if release_result.is_successful():
-                            print(f"Successfully released {k}")
+        if data:
+            self._get_ids_of_tree(data, id_collector)
+            status = self.kg.post(f"/instancesByIds/release/status", payload=list(id_collector), params={"releaseTreeScope": "TOP_INSTANCE_ONLY"})
+            if status.is_successful():
+                for k in status.data().keys():
+                    v = status.data()[k]
+                    if "data" not in v or v["data"] != "RELEASED":
+                        if self._simulate:
+                            print(f"Would release {k}")
                         else:
-                            print(f"Was not able to release {k} - {release_result.error()}")
+                            release_result = self.kg.put(f"/instances/{k}/release", {}, {})
+                            if release_result.is_successful():
+                                print(f"Successfully released {k}")
+                            else:
+                                print(f"Was not able to release {k} - {release_result.error()}")
+        else:
+            print(f"No release tree found for id {id}")
 
     def release_dependency_tree(self):
         for root_document in self._root_documents:
