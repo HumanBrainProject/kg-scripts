@@ -20,19 +20,19 @@ class RemoveSpace(object):
                     if instances.total()>0:
                         print(f"Type {type_name} in space {self._space_name} still contains {instances.total()} instances - skipping.")
                         errors = True
+                    else:
+                        if self._simulate:
+                            print(f"Would remove type definition for {type_name}")
+                        else:
+                            type_removal = self.kg.delete(path=f'/spaces/{self._space_name}/types', params={"type": type_name})
+                            if type_removal.status_code == 200:
+                                print(f"Successfully removed type {type_name} from space {self._space_name}")
+                            else:
+                                print(f"Wasn't able to remove type {type_name} from space {self._space_name} - reason {type_removal.status_code}")
+                                errors = True
                 else:
                     print(f"Was not able to evaluate the number of instances of type {type_name} in space {self._space_name}")
                     errors = True
-                if not errors:
-                    if self._simulate:
-                        print(f"Would remove type definition for {type_name}")
-                    else:
-                        type_removal = self.kg.delete(path=f'/spaces/{self._space_name}/types', params={"type": type_name})
-                        if type_removal.status_code == 200:
-                            print(f"Successfully removed type {type_name} from space {self._space_name}")
-                        else:
-                            print(f"Wasn't able to remove type {type_name} from space {self._space_name} - reason {type_removal.status_code}")
-                            errors = True
             if errors:
                 print("Was not able to remove all type definitions. Stopping.")
             else:
