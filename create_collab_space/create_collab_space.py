@@ -39,7 +39,7 @@ class CreateCollabSpace(object):
                 print(f"Successfully created collab space for {self._space_name}")
                 self._apply_types_from_space()
             else:
-                print(f"Was not able to create space - {result.status_code}")
+                print(f"Was not able to create space - {result}")
 
 def run(properties: dict, kg: KGv3):
     CreateCollabSpace(kg, properties, False).create_collab_space()
