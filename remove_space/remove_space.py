@@ -33,17 +33,17 @@ class RemoveSpace(object):
                         else:
                             print(f"Wasn't able to remove type {type_name} from space {self._space_name} - reason {type_removal.status_code}")
                             errors = True
-                    if errors:
-                        print("Was not able to remove all type definitions. Stopping.")
+            if errors:
+                print("Was not able to remove all type definitions. Stopping.")
+            else:
+                if self._simulate:
+                    print(f"Would remove space definition for {self._space_name}")
+                else:
+                    space_spec = self.kg.delete(path=f'/spaces/{self._space_name}/specification', params={})
+                    if space_spec.status_code == 200:
+                        print(f"Successfully removed space specification for {self._space_name}")
                     else:
-                        if self._simulate:
-                            print(f"Would remove space definition for {self._space_name}")
-                        else:
-                            space_spec = self.kg.delete(path=f'/spaces/{self._space_name}/specification', params={})
-                            if space_spec.status_code == 200:
-                                print(f"Successfully removed space specification for {self._space_name}")
-                            else:
-                                print(f"Wasn't able to remove the space specification for {self._space_name} - reason {space_spec.status_code}")
+                        print(f"Wasn't able to remove the space specification for {self._space_name} - reason {space_spec.status_code}")
         else:
             print(f"Wasn't able to find the type information for the space {self._space_name}")
 
