@@ -1,5 +1,5 @@
 from kg_core.kg import KGv3
-from kg_core.models import Stage
+from kg_core.models import Stage, ResponseConfiguration, Pagination
 
 
 class RemoveSpace(object):
@@ -10,40 +10,42 @@ class RemoveSpace(object):
         self._simulate: bool = simulate
 
     def remove_space(self):
-        instances = self.kg.get_instances(Stage.IN_PROGRESS, None, self._space_name)
-        if instances.is_successful():
-            if instances.total()>0:
-                print(f"Can not remove space {self._space_name} because it still contains {instances.total()} instances - please (re)move them first")
-            else:
-                types = self.kg.types(Stage.IN_PROGRESS, self._space_name)
-                if types.is_successful():
-                    errors = False
-                    for t in types.data():
-                        type_name = t['http://schema.org/identifier']
-                        if self._simulate:
-                            print(f"Would remove type definition for {type_name}")
-                        else:
-                            type_removal = self.kg.delete(path=f'/spaces/{self._space_name}/types', params={"type": type_name})
-                            if type_removal.status_code==200:
-                                print(f"Successfully removed type {type_name} from space {self._space_name}")
-                            else:
-                                print(f"Wasn't able to remove type {type_name} from space {self._space_name} - reason {type_removal.status_code}")
-                                errors = True
-                        if errors:
-                            print("Was not able to remove all type definitions. Stopping.")
-                        else:
-                            if self._simulate:
-                                print(f"Would remove space definition for {self._space_name}")
-                            else:
-                                space_spec = self.kg.delete(path=f'/spaces/{self._space_name}/specification', params={})
-                                if space_spec.status_code == 200:
-                                    print(f"Successfully removed space specification for {self._space_name}")
-                                else:
-                                    print(f"Wasn't able to remove the space specification for {self._space_name} - reason {space_spec.status_code}")
+        types = self.kg.types(Stage.IN_PROGRESS, self._space_name)
+        if types.is_successful():
+            errors = False
+            for t in types.data():
+                type_name = t['http://schema.org/identifier']
+                instances = self.kg.get_instances(Stage.IN_PROGRESS, type_name, self._space_name, pagination=Pagination(start_from=0, size=0))
+                if instances.is_successful():
+                    if instances.total()>0:
+                        print(f"Type {type_name} in space {self._space_name} still contains {instances.total()} instances - skipping.")
+                        errors = True
                 else:
-                    print(f"Wasn't able to find the type information for the space {self._space_name}")
+                    print(f"Was not able to evaluate the number of instances of type {type_name} in space {self._space_name}")
+                    errors = True
+                if not errors:
+                    if self._simulate:
+                        print(f"Would remove type definition for {type_name}")
+                    else:
+                        type_removal = self.kg.delete(path=f'/spaces/{self._space_name}/types', params={"type": type_name})
+                        if type_removal.status_code == 200:
+                            print(f"Successfully removed type {type_name} from space {self._space_name}")
+                        else:
+                            print(f"Wasn't able to remove type {type_name} from space {self._space_name} - reason {type_removal.status_code}")
+                            errors = True
+                    if errors:
+                        print("Was not able to remove all type definitions. Stopping.")
+                    else:
+                        if self._simulate:
+                            print(f"Would remove space definition for {self._space_name}")
+                        else:
+                            space_spec = self.kg.delete(path=f'/spaces/{self._space_name}/specification', params={})
+                            if space_spec.status_code == 200:
+                                print(f"Successfully removed space specification for {self._space_name}")
+                            else:
+                                print(f"Wasn't able to remove the space specification for {self._space_name} - reason {space_spec.status_code}")
         else:
-            print("Wasn't able to validate the number of instances in the space remaining")
+            print(f"Wasn't able to find the type information for the space {self._space_name}")
 
 
 def run(properties: dict, kg: KGv3):
