@@ -1,0 +1,3 @@
+This script allows to create a collab space incl. the application of the types from another space (as a template).
+
+Please note that you need to be an administrator of the collab for which you want to create the KG space
