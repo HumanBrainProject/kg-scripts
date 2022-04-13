@@ -1,0 +1,1 @@
+This script allows to reinfer the instances of a specific type. Please note that you require ADMIN rights to do so.
