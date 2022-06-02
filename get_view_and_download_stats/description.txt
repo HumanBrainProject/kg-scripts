@@ -1,0 +1,1 @@
+This script extracts some statistics from the view and download metrics in the graph
