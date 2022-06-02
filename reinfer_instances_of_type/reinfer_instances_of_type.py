@@ -12,7 +12,7 @@ class ReinferInstancesOfType(object):
 
     def reinfer(self):
         instances = self.kg.get_instances(Stage.IN_PROGRESS, self._type_name, self._space_name)
-        while instances:
+        while instances and instances.data():
             for instance in instances.data():
                 if self._simulate:
                     print(f"Will try to reinfer the instance {instance['@id']}")
