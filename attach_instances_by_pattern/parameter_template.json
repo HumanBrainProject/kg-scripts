@@ -1,0 +1,16 @@
+{
+  "target": {
+    "instanceUUID": "cb40a501-b155-4c2f-8df3-0ee7c5f1ed00",
+    "property": "https://openminds.ebrains.eu/vocab/studiedSpecimen"
+  },
+  "source": {
+    "space": "dataset",
+    "type": "https://openminds.ebrains.eu/core/TissueSample",
+    "filterProperty": "https://openminds.ebrains.eu/vocab/lookupLabel",
+    "filterPattern": "BigBrain_brain-20_slice-(\\d+)",
+    "range": {
+      "from": 3751,
+      "to": 4396
+    }
+  }
+}

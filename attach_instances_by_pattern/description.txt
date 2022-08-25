@@ -1,0 +1,1 @@
+Sometimes you know a pattern of instances you might want to attach to a property of another instance. This is what this script does. It helps to reduce a lot of manual work.
