@@ -1,33 +1,35 @@
-from kg_core.kg import KGv3
-from kg_core.models import Stage, ResponseConfiguration, Pagination
+from kg_core.kg import  Admin, Client, kg
+from kg_core.request import Stage, Pagination
 
 
 class ReinferInstancesOfType(object):
 
-    def __init__(self, kg: KGv3, properties: dict, simulate: bool):
-        self.kg = kg
+    def __init__(self, kg_client: Client, kg_admin: Admin, properties: dict, simulate: bool):
+        self.kg_client = kg_client
+        self.kg_admin = kg_admin
         self._space_name: str = properties['spaceName']
         self._type_name: str = properties['typeName']
         self._simulate: bool = simulate
 
     def reinfer(self):
-        instances = self.kg.get_instances(Stage.IN_PROGRESS, self._type_name, self._space_name)
-        while instances and instances.data():
-            for instance in instances.data():
-                if self._simulate:
-                    print(f"Will try to reinfer the instance {instance['@id']}")
+        instances = self.kg_client.instances.list(target_type=self._type_name, stage=Stage.IN_PROGRESS, space=self._space_name, pagination=Pagination(size=200))
+        for instance in instances.items():
+            if self._simulate:
+                print(f"Will try to reinfer the instance {instance['@id']}")
+            else:
+                error = self.kg_admin.trigger_inference(space = self._space_name, identifier=instance.instance_id)
+                if error:
+                    print(f"Was not able to reinfer {instance.instance_id}")
                 else:
-                    result = self.kg.post(path=f"/spaces/{self._space_name}/inference", payload={}, params={"identifier": instance['@id']})
-                    if result.is_successful():
-                        print(f"Successfully reinferred {instance['@id']}")
-                    else:
-                        print(f"Was not able to reinfer {instance['@id']}")
-            instances = self.kg.next_page(instances)
+                    print(f"Successfully reinferred {instance.instance_id}")
 
 
-def run(properties: dict, kg: KGv3):
-    ReinferInstancesOfType(kg, properties, False).reinfer()
+def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate:bool):
+    ReinferInstancesOfType(kg_client, kg_admin, properties, simulate).reinfer()
 
 
-def simulate(properties: dict, kg: KGv3):
-    ReinferInstancesOfType(kg, properties, True).reinfer()
+if __name__ == '__main__':
+    # endpoint = "core.kg.ebrains.eu"
+    endpoint = "core.kg-ppd.ebrains.eu"
+    simulate = True
+    run( { "spaceName": "common", "typeName": "https://openminds.ebrains.eu/core/Person" }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)

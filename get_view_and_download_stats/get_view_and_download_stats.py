@@ -1,15 +1,15 @@
 from typing import List
 
-from kg_core.kg import KGv3
-from kg_core.models import Stage
-from kg_core.oauth import SimpleToken
-import os
+from kg_core.kg import Admin, Client, kg
+from kg_core.request import Stage, Pagination
+from kg_core.response import JsonLdDocument, ResultPage
 
 
 class GetViewAndDownloadStats(object):
 
-    def __init__(self, kg: KGv3, properties: dict, simulate: bool):
-        self.kg = kg
+    def __init__(self, kg_client: Client, kg_admin: Admin, properties: dict, simulate: bool):
+        self.kg_client = kg_client
+        self.kg_admin = kg_admin
         self._simulate: bool = simulate
         self._filter_type = properties["filterType"]
         self._query = {
@@ -66,26 +66,24 @@ class GetViewAndDownloadStats(object):
         }
 
     def stats(self):
-        instances = self.kg.queries(self._query, Stage.IN_PROGRESS)
-        collect = []
-        while instances and instances.data():
-            collect.extend(instances.data())
-            instances = self.kg.next_page(instances)
-        if self._filter_type:
-            collect = list(filter(lambda c: self._filter_type in c['metricOf']['type'], collect))
+        instances: ResultPage[JsonLdDocument] = self.kg_client.queries.test_query(payload=self._query, stage=Stage.IN_PROGRESS, pagination=Pagination(size=500))
+        collect: List[JsonLdDocument] = []
+        for i in instances.items():
+            if self._filter_type in i['metricOf']['type']:
+                collect.append(i)
         self._aggregate(collect, "allTimeViews")
         self._aggregate(collect, "allTimeDownloads")
         self._aggregate(collect, "last30daysViews")
         self._aggregate(collect, "last30daysDownloads")
 
-    def _aggregate(self, full_list:List[dict], sort_by:str):
+    def _aggregate(self, full_list:List[JsonLdDocument], sort_by:str):
         sorted_list = sorted(full_list, key=lambda d: d[sort_by], reverse=True)
         top_ten = sorted_list[0:10]
         ranges = [0, 10, 20, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000, 5000, 10000]
         ranges.reverse()
         range_map = {"0": []}
         for i in full_list:
-            uuid = self.kg.uuid_from_absolute_id(i['metricOf']['id'])
+            uuid = i.to_uuid(i['metricOf']['id'])
             if i[sort_by] == 0:
                 range_map["0"].append(uuid)
             else:
@@ -101,7 +99,7 @@ class GetViewAndDownloadStats(object):
         print("************")
         print("Top ten:")
         for i in top_ten:
-            uuid = self.kg.uuid_from_absolute_id(i['metricOf']['id'])
+            uuid = i.to_uuid(i['metricOf']['id'])
             print(f"{i[sort_by]} - {uuid} ({', '.join(i['metricOf']['type'])})")
         print("")
         print("Distribution:")
@@ -115,14 +113,12 @@ class GetViewAndDownloadStats(object):
         print("")
 
 
-def run(properties: dict, kg: KGv3):
-    GetViewAndDownloadStats(kg, properties, False).stats()
-
-
-def simulate(properties: dict, kg: KGv3):
-    GetViewAndDownloadStats(kg, properties, True).stats()
+def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate: bool):
+    GetViewAndDownloadStats(kg_client, kg_admin, properties, simulate).stats()
 
 
 if __name__ == '__main__':
-    GetViewAndDownloadStats(KGv3("core.kg.ebrains.eu", token_handler=SimpleToken(os.getenv("KG_TOKEN"))), {"filterType": "https://openminds.ebrains.eu/core/DatasetVersion"}, True).stats()
-    #GetViewAndDownloadStats(KGv3("core.kg.ebrains.eu", token_handler=SimpleToken(os.getenv("KG_TOKEN"))), {"filterType": None}, True).stats()
+    # endpoint = "core.kg.ebrains.eu"
+    endpoint = "core.kg-ppd.ebrains.eu"
+    simulate = True
+    run( {"filterType": "https://openminds.ebrains.eu/core/DatasetVersion"}, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)

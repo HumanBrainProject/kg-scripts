@@ -1,14 +1,12 @@
-from typing import List
-
-from kg_core.kg import KGv3
-from kg_core.models import Stage
-from kg_core.oauth import ClientCredentials
+from kg_core.kg import Client, Admin, kg
+from kg_core.request import Stage
 
 
 class CreateCollabSpace(object):
 
-    def __init__(self, kg: KGv3, properties: dict, simulate: bool):
-        self.kg = kg
+    def __init__(self, kg_client: Client, kg_admin: Admin, properties: dict, simulate: bool):
+        self.kg_client = kg_client
+        self.kg_admin = kg_admin
         self._space_name: str = f"collab-{properties['collabName']}"
         self._types_from_space = properties["applyTypesFromSpace"] if "applyTypesFromSpace" in properties else None
         self._simulate: bool = simulate
@@ -17,37 +15,36 @@ class CreateCollabSpace(object):
         if not self._types_from_space:
             print("No types applied from another space")
         else:
-            result = self.kg.types(Stage.IN_PROGRESS, self._types_from_space)
-            if result.is_successful():
-                for t in result.data():
-                    type_name = t['http://schema.org/identifier']
-                    if self._simulate:
-                        print(f"Would attach type {type_name} to space {self._space_name}")
+            result = self.kg_client.types.list(stage=Stage.IN_PROGRESS, space=self._types_from_space)
+            for t in result.items():
+                if self._simulate:
+                    print(f"Would attach type {t.identifier} to space {self._space_name}")
+                else:
+                    error = self.kg_admin.assign_type_to_space(space=self._space_name, target_type=t.identifier)
+                    if error:
+                        print(f"Was not able to attach the type {t.identifier} to space {self._space_name} - reason {result.status_code}")
                     else:
-                        result = self.kg.put(path=f"/spaces/{self._space_name}/types", payload={}, params={"type": type_name})
-                        if result.status_code == 200:
-                            print(f"Successfully attached the type {type_name} to space {self._space_name}")
-                        else:
-                            print(f"Was not able to attach the type {type_name} to space {self._space_name} - reason {result.status_code}")
-            else:
-                print(f"Wasn't able to fetch the types from space {self._space_name}")
+                        print(f"Successfully attached the type {t.identifier} to space {self._space_name}")
 
     def create_collab_space(self):
         if self._simulate:
             print(f"Would try to create the collab space for {self._space_name}")
             self._apply_types_from_space()
         else:
-            result = self.kg.put(path=f"/spaces/{self._space_name}/specification", payload={}, params={"autorelease": False, "clientSpace":False, "deferCache": False}).status_code
-            if result == 200:
+            error = self.kg_admin.create_space_definition(space=self._space_name)
+            if error:
+                print(f"Was not able to create space - {error}")
+            else:
                 print(f"Successfully created collab space for {self._space_name}")
                 self._apply_types_from_space()
-            else:
-                print(f"Was not able to create space - {result}")
 
 
-def run(properties: dict, kg: KGv3):
-    CreateCollabSpace(kg, properties, False).create_collab_space()
+def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate: bool):
+    CreateCollabSpace(kg_client, kg_admin, properties, simulate).create_collab_space()
 
 
-def simulate(properties: dict, kg: KGv3):
-    CreateCollabSpace(kg, properties, True).create_collab_space()
+if __name__ == '__main__':
+    # endpoint = "core.kg.ebrains.eu"
+    endpoint = "core.kg-ppd.ebrains.eu"
+    simulate = True
+    run({ "collabName": "foobar", "applyTypesFromSpace": "collab-software-curation" }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)
