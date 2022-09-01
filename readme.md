@@ -9,7 +9,7 @@ The scripts are held in python and they have to follow these conventions:
 
 - each unit has its own package
 - each package has a python file named the same way as the package (called "main script")
-- the "main script" provides two methods: `run(properties:dict, kg:KGv3)` and `def simulate(properties:dict, kg:KGv3)`
+- the "main script" provides one method: `def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate:bool)`
 - each package provides a file called `parameter_template.json` which defines the structure (and potential default values) of the properties which are passed to the above mentioned methods.
 - each package provides a file called `description.txt` which describes what this script is doing. It can e.g. be displayed in the Jupyter notebook to let the user decide if it's the right script to be executed.
 - dependencies to other packages can be specified in the requirements.txt file
