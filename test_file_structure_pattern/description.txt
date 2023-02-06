@@ -1,1 +1,5 @@
-This script allows to test a regular expression for the file repository structure and a specific repository
+This script allows to test a regular expression for the file repository structure and a specific repository.
+
+*ATTENTION*: Please note that you need to double escape "\" -> ".+\/([\d]{5})\/.+" in the KG becomes ".+\\/([\\d]{5})\\/.+"
+
+
