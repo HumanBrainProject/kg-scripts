@@ -1,0 +1,1 @@
+This script allows to test a regular expression for the file repository structure and a specific repository
