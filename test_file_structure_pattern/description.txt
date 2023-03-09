@@ -1,4 +1,4 @@
-This script allows to test a regular expression for the file repository structure and a specific repository.
+This script allows to test a regular expression for the file repository structure and a specific repository. With the limit you can reduce the number of files checked. If set to -1 all files will be evaluated. Changing this value might be useful for testing with large repositories.
 
 *ATTENTION*: Please note that you need to double escape "\" -> ".+\/([\d]{5})\/.+" in the KG becomes ".+\\/([\\d]{5})\\/.+"
 

@@ -11,17 +11,23 @@ class TestFileStructurePattern(object):
         self.kg_admin = kg_admin
         self._fileRepositoryUUID: UUID = properties['fileRepositoryUUID']
         self._filePathPattern: str = properties['filePathPattern']
+        self._limitInstancesToValidate: int = properties['limitInstancesToValidate']
         self._simulate: bool = simulate
 
-    def test(self):
-        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.ebrains.eu/vocab/fileRepository", "https://openminds.ebrains.eu/core/File", stage=Stage.IN_PROGRESS, pagination=Pagination(return_total_results=False))
+    def _iterate_data(self) -> dict:
+        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.ebrains.eu/vocab/fileRepository", "https://openminds.ebrains.eu/core/File",
+                                                           stage=Stage.IN_PROGRESS, pagination=Pagination(return_total_results=False))
         bundles = {}
+        count = 0
         while page:
             ids = [str(i.uuid) for i in page.data]
             full_instances = self.kg_client.instances.get_by_ids(ids, stage=Stage.IN_PROGRESS)
             if full_instances.data:
                 for k, f in full_instances.data.items():
                     if f.data:
+                        count += 1
+                        if self._limitInstancesToValidate != -1 and count > self._limitInstancesToValidate:
+                            return bundles
                         iri = f.data["https://openminds.ebrains.eu/vocab/IRI"]
                         match = re.match(self._filePathPattern, iri)
                         if match:
@@ -31,7 +37,11 @@ class TestFileStructurePattern(object):
                                     bundles[bundle_name] = []
                                 bundles[bundle_name].append(iri)
             page = page.next_page()
+        return bundles
 
+
+    def test(self):
+        bundles = self._iterate_data()
         if bundles:
             print("The regular expression is going to create the following file bundles:")
             for b in sorted(bundles.keys()):
@@ -47,10 +57,11 @@ def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate: bool):
 
 
 if __name__ == '__main__':
-    # endpoint = "core.kg.ebrains.eu"
-    endpoint = "core.kg-int.ebrains.eu"
+    endpoint = "core.kg.ebrains.eu"
+    #endpoint = "core.kg-int.ebrains.eu"
     simulate = True
     run({
         "fileRepositoryUUID": "05542a24-d03a-4d09-b0fc-8b665981cc70",
-        "filePathPattern": ".+\\/(sIPSCs\\/Sub[1-3]{1}\\/Samp1)\\/.+"
+        "filePathPattern": ".+\\/(sIPSCs\\/Sub[1-3]{1}\\/Samp1)\\/.+",
+        "limitInstancesToValidate": -1
     }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)
