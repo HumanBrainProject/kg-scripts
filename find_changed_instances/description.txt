@@ -1,0 +1,2 @@
+This script allows to find instances in the "HAS_CHANGED" state for a specific type.
+
