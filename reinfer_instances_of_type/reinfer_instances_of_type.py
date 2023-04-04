@@ -8,7 +8,7 @@ class ReinferInstancesOfType(object):
         self.kg_client = kg_client
         self.kg_admin = kg_admin
         self._space_name: str = properties['spaceName']
-        self._type_name: str = properties['typeName']
+        self._type_name: str = properties['typeName'] if "typeName" in properties else None
         self._simulate: bool = simulate
 
     def reinfer(self):
