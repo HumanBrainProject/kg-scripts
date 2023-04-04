@@ -12,7 +12,16 @@ class ReinferInstancesOfType(object):
         self._simulate: bool = simulate
 
     def reinfer(self):
-        instances = self.kg_client.instances.list(target_type=self._type_name, stage=Stage.IN_PROGRESS, space=self._space_name, pagination=Pagination(size=200))
+        if self._type_name:
+            self._do_reinference(self._type_name)
+        else:
+            for type in self.kg_client.types.list(self._space_name, stage=Stage.IN_PROGRESS).items():
+                if type.identifier:
+                    self._do_reinference(type.identifier)
+
+    def _do_reinference(self, type_name:str):
+        print(f"Reinferring type {type_name}")
+        instances = self.kg_client.instances.list(target_type=type_name, stage=Stage.IN_PROGRESS, space=self._space_name, pagination=Pagination(size=200))
         for instance in instances.items():
             if self._simulate:
                 print(f"Will try to reinfer the instance {instance['@id']}")

@@ -1,1 +1,1 @@
-This script allows to reinfer the instances of a specific type. Please note that you require ADMIN rights to do so.
+This script allows to reinfer the instances of a specific type or (if no type is provided) all types of a space. Please note that you require ADMIN rights to do so.
