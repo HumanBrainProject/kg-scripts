@@ -1,0 +1,1 @@
+This script allows to create a space incl. the application of the types from another space (as a template).
