@@ -2,7 +2,7 @@ from kg_core.kg import Client, Admin, kg
 from kg_core.request import Stage
 
 
-class CreateCollabSpace(object):
+class CreateSpace(object):
 
     def __init__(self, kg_client: Client, kg_admin: Admin, properties: dict, simulate: bool):
         self.kg_client = kg_client
@@ -40,7 +40,7 @@ class CreateCollabSpace(object):
 
 
 def run(properties: dict, kg_client: Client, kg_admin: Admin, simulate: bool):
-    CreateCollabSpace(kg_client, kg_admin, properties, simulate).create_space()
+    CreateSpace(kg_client, kg_admin, properties, simulate).create_space()
 
 
 if __name__ == '__main__':

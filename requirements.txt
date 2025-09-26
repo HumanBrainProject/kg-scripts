@@ -1,1 +1,1 @@
-ebrains-kg-core>=0.9.8
+ebrains-kg-core>=0.9.20
