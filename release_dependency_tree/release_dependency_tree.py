@@ -23,7 +23,7 @@ class ReleaseDependencyTree(object):
                 type_list = tree.types
                 if not type(type_list) == list:
                     type_list = [type_list]
-                if not self._release_ebrains_dois and "https://openminds.ebrains.eu/core/DOI" in type_list and "doi.org/10.25493" in tree.label:
+                if not self._release_ebrains_dois and "https://openminds.om-i.org/types/DOI" in type_list and "doi.org/10.25493" in tree.label:
                     print(f"Exclude {tree.uuid} because this is an EBRAINS DOI")
                     exclude = True
             if not exclude:

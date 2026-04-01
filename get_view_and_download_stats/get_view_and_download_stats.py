@@ -121,4 +121,4 @@ if __name__ == '__main__':
     # endpoint = "core.kg.ebrains.eu"
     endpoint = "core.kg-ppd.ebrains.eu"
     simulate = True
-    run( {"filterType": "https://openminds.ebrains.eu/core/DatasetVersion"}, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)
+    run( {"filterType": "https://openminds.om-i.org/types/DatasetVersion"}, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)

@@ -36,5 +36,5 @@ if __name__ == '__main__':
     #endpoint = "core.kg-int.ebrains.eu"
     simulate = True
     run({
-        "type": "https://openminds.ebrains.eu/core/DatasetVersion"
+        "type": "https://openminds.om-i.org/types/DatasetVersion"
     }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)

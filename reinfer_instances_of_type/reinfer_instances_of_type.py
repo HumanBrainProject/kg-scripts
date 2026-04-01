@@ -41,4 +41,4 @@ if __name__ == '__main__':
     # endpoint = "core.kg.ebrains.eu"
     endpoint = "core.kg-ppd.ebrains.eu"
     simulate = True
-    run( { "spaceName": "common", "typeName": "https://openminds.ebrains.eu/core/Person" }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)
+    run( { "spaceName": "common", "typeName": "https://openminds.om-i.org/types/Person" }, kg(endpoint).build(), kg(endpoint).build_admin(), simulate)

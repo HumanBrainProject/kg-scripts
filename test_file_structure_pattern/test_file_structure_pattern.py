@@ -15,7 +15,7 @@ class TestFileStructurePattern(object):
         self._simulate: bool = simulate
 
     def _iterate_data(self) -> dict:
-        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.ebrains.eu/vocab/fileRepository", "https://openminds.ebrains.eu/core/File",
+        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.om-i.org/props/fileRepository", "https://openminds.om-i.org/props/File",
                                                            stage=Stage.IN_PROGRESS, pagination=Pagination(return_total_results=False))
         bundles = {}
         count = 0
@@ -28,7 +28,7 @@ class TestFileStructurePattern(object):
                         count += 1
                         if self._limitInstancesToValidate != -1 and count > self._limitInstancesToValidate:
                             return bundles
-                        iri = f.data["https://openminds.ebrains.eu/vocab/IRI"]
+                        iri = f.data["https://openminds.om-i.org/props/IRI"]
                         match = re.match(self._filePathPattern, iri)
                         if match:
                             bundle_name = " ".join([i for i in list(match.groups()) if i]).strip()
