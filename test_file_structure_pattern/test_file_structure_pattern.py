@@ -15,7 +15,7 @@ class TestFileStructurePattern(object):
         self._simulate: bool = simulate
 
     def _iterate_data(self) -> dict:
-        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.om-i.org/props/fileRepository", "https://openminds.om-i.org/props/File",
+        page = self.kg_client.instances.get_incoming_links(self._fileRepositoryUUID, "https://openminds.om-i.org/props/fileRepository", "https://openminds.om-i.org/types/File",
                                                            stage=Stage.IN_PROGRESS, pagination=Pagination(return_total_results=False))
         bundles = {}
         count = 0
